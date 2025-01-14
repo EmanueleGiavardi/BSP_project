@@ -39,20 +39,6 @@ class StochasticProcess:
         return iter(self.realizations)
 
 
-    def get_duration(self):
-        """
-        Returns: 
-            duration (int): the realizations duration (in seconds)
-        """
-        return self.duration
-    
-    def get_timestamps(self):
-        """
-        Returns: 
-            timestamps (list): realizations timestamps 
-        """
-        return self.timestamps
-
     def get_realization_by_index(self, index):
         """
         Args:
