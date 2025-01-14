@@ -32,6 +32,13 @@ class StochasticProcess:
         self.timestamps = np.linspace(0, self.duration, len(self.realizations[0]), endpoint=False)
 
 
+    def __iter__(self):
+        """
+        Iterates over the realizations of this process
+        """
+        return iter(self.realizations)
+
+
     def get_duration(self):
         """
         Returns: 
@@ -85,10 +92,11 @@ class StochasticProcess:
             raise(ValueError(f"No realization in stochastic process named {label}"))
 
 
-    def plot_realization(self, index):
+    def plot_realization(self, index, title):
         """
         Args:
             index (int): label of the channel to plot
+            title (str): plot title
 
         Raises: 
             ValueError if the index is not valid (outside range [0 ; num_realizations-1])
@@ -99,18 +107,19 @@ class StochasticProcess:
             raise ValueError(f"This process has {self.num_realizations} realizations")
         plt.figure(figsize=(14, 6))
         plt.plot(self.timestamps, realization)
-        plt.title(self.labels[index])
+        plt.title(title)
         plt.xlabel('Time [s]')
         plt.ylabel('Amplitude')
         plt.grid(True)
         plt.show()
 
 
-    def plot_realization_spectrum(self, index, xlim=100, ylim=100000, plot_magnitude=True):
+    def plot_realization_spectrum(self, index, title, xlim=100, ylim=100000, plot_magnitude=True):
         """
         Args:
             index (int): label of the channel' spectrum to plot
             plot_magnitude (bool): True for plotting channel's magnitude, False for plotting channel's phase
+            title (str): plot title
 
         Raises: 
             ValueError if the index is not valid (outside range [0 ; num_realizations-1])
@@ -124,14 +133,14 @@ class StochasticProcess:
         fft_values = fft(realization)
         magnitude = np.abs(fft_values[:K // 2])
         phase = np.angle(fft_values[:K // 2])
-
         plt.figure(figsize=(14, 6))
-        if plot_magnitude:
+
+        if plot_magnitude: 
             plt.plot(freqs, magnitude)
-            plt.title(f"{self.labels[index]} spectrum (magnitude)")
-        else:
+        else: 
             plt.plot(freqs, phase)
-            plt.title(f"{self.labels[index]} spectrum (magnitude)")
+        
+        plt.title(title)
         plt.xlabel('Frequency (Hz)')
         plt.ylabel('Amplitude')
         plt.xlim(0, xlim)
