@@ -20,7 +20,7 @@ class BaselineWanderRemover:
     def highpass_fir_filter(self, signal):
         """
         Args:
-            signal (list): the signal to which the filter has to be applied
+            signal (array): the signal for which the filter has to be applied
         """
         fir_coefficients = firwin(self.num_taps, self.cutoff_normalized, pass_zero=False)
         filtered_signal = filtfilt(fir_coefficients, [1.0], signal)

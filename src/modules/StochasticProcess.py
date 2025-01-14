@@ -11,7 +11,7 @@ class StochasticProcess:
 
         Args:
             num_realizations (int): total number of channels
-            realizations (list): list containing the actual signals related to this process
+            realizations (array): the actual signals related to this process
             labels (list): list containing names related to this process
             colors (list): list containing colors related to this process (for visual representation only)
             sr (int): signals sample rate
@@ -49,7 +49,7 @@ class StochasticProcess:
     def get_timestamps(self):
         """
         Returns: 
-            timestamps (list): the realizations timestamps 
+            timestamps (list): realizations timestamps 
         """
         return self.timestamps
 
@@ -59,7 +59,7 @@ class StochasticProcess:
             index (int): index of the channel to extract
 
         Returns: 
-            realizations (list): the realization related to the index 
+            realization (array): the realization related to the index 
 
         Raises: 
             ValueError if the index is not valid (outside range [0 ; num_realizations-1])
@@ -76,7 +76,7 @@ class StochasticProcess:
             label (string): label of the channel to extract
 
         Returns: 
-            realizations (list): the realization related to the label 
+            realization (array): the realization related to the label 
 
         Raises: 
             ValueError if no realization is named as the label arg
