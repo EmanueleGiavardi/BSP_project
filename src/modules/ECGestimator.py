@@ -47,7 +47,7 @@ class ECGestimator:
             real_ECGs[realization] = []
             real_ECGs_positions[realization] = []
             for qrs_peak in peaks:
-                if (qrs_peak - self.samples_before_QRS <= 0):
+                if (qrs_peak - self.samples_before_QRS < 0):
                     # gestione estremo sinistro: se il primo complesso ECG occorre "troppo presto" si fa uno zero padding per la finestra (che tanto serve solo per calcolare la media)
                     # e ci si salva la posizione (0, qrs_peak+self.samples_after_QRS)
                     padding_len = self.samples_before_QRS - qrs_peak
@@ -55,7 +55,15 @@ class ECGestimator:
                     window = np.concatenate([padding, signal[0:int((qrs_peak + self.samples_after_QRS))]])
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((0, int(qrs_peak + self.samples_after_QRS)))
+                if (qrs_peak + self.samples_after_QRS > len(signal)):
+                    window_len = self.samples_before_QRS + 1 + self.samples_after_QRS
+                    first_part_window = signal[int(qrs_peak - self.samples_before_QRS):len(signal)]
+                    padding = np.zeros(int(window_len - len(first_part_window)-1))
+                    window = np.concatenate([first_part_window, padding])
+                    real_ECGs[realization].append(window)
+                    real_ECGs_positions[realization].append((int(qrs_peak - self.samples_before_QRS), len(signal)-1))
                 elif (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
+                #if (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
                     window = signal[int(qrs_peak - self.samples_before_QRS):int(qrs_peak + self.samples_after_QRS)]
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((int(qrs_peak - self.samples_before_QRS), int(qrs_peak + self.samples_after_QRS)))
@@ -210,6 +218,9 @@ class ECGestimator:
             residual = real_ECGs[i] - estimated_ECGs[i]
             if start_i_complex == 0:
                 corrected_residual = residual[(len(residual)-end_i_complex):]
+                residual_realization[start_i_complex:end_i_complex] = corrected_residual
+            elif end_i_complex == len(original_realization)-1:
+                corrected_residual = residual[:len(original_realization)-end_i_complex]
                 residual_realization[start_i_complex:end_i_complex] = corrected_residual
             else:
                 residual_realization[start_i_complex:end_i_complex] = residual
