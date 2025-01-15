@@ -48,14 +48,14 @@ class ECGestimator:
             real_ECGs_positions[realization] = []
             for qrs_peak in peaks:
                 if (qrs_peak - self.samples_before_QRS < 0):
-                    # gestione estremo sinistro: se il primo complesso ECG occorre "troppo presto" si fa uno zero padding per la finestra (che tanto serve solo per calcolare la media)
-                    # e ci si salva la posizione (0, qrs_peak+self.samples_after_QRS)
+                    # if the first ECG component is not entirely contained in the signal -> initial padding
                     padding_len = self.samples_before_QRS - qrs_peak
                     padding = np.zeros(int(padding_len))
                     window = np.concatenate([padding, signal[0:int((qrs_peak + self.samples_after_QRS))]])
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((0, int(qrs_peak + self.samples_after_QRS)))
                 if (qrs_peak + self.samples_after_QRS > len(signal)):
+                    # if the last ECG component is not entirely contained in the signal -> ending padding
                     window_len = self.samples_before_QRS + 1 + self.samples_after_QRS
                     first_part_window = signal[int(qrs_peak - self.samples_before_QRS):len(signal)]
                     padding = np.zeros(int(window_len - len(first_part_window)-1))
@@ -63,7 +63,6 @@ class ECGestimator:
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((int(qrs_peak - self.samples_before_QRS), len(signal)-1))
                 elif (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
-                #if (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
                     window = signal[int(qrs_peak - self.samples_before_QRS):int(qrs_peak + self.samples_after_QRS)]
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((int(qrs_peak - self.samples_before_QRS), int(qrs_peak + self.samples_after_QRS)))
