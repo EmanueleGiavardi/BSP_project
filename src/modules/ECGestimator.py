@@ -47,7 +47,15 @@ class ECGestimator:
             real_ECGs[realization] = []
             real_ECGs_positions[realization] = []
             for qrs_peak in peaks:
-                if (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
+                if (qrs_peak - self.samples_before_QRS <= 0):
+                    # gestione estremo sinistro: se il primo complesso ECG occorre "troppo presto" si fa uno zero padding per la finestra (che tanto serve solo per calcolare la media)
+                    # e ci si salva la posizione (0, qrs_peak+self.samples_after_QRS)
+                    padding_len = self.samples_before_QRS - qrs_peak
+                    padding = np.zeros(int(padding_len))
+                    window = np.concatenate([padding, signal[0:int((qrs_peak + self.samples_after_QRS))]])
+                    real_ECGs[realization].append(window)
+                    real_ECGs_positions[realization].append((0, int(qrs_peak + self.samples_after_QRS)))
+                elif (qrs_peak - self.samples_before_QRS > 0 and qrs_peak + self.samples_after_QRS < len(signal)):
                     window = signal[int(qrs_peak - self.samples_before_QRS):int(qrs_peak + self.samples_after_QRS)]
                     real_ECGs[realization].append(window)
                     real_ECGs_positions[realization].append((int(qrs_peak - self.samples_before_QRS), int(qrs_peak + self.samples_after_QRS)))
@@ -173,3 +181,37 @@ class ECGestimator:
                 estimated_ECGs[label].append(self.get_scaled_ECG_complex(a, mu_P, mu_QRS, mu_T))
 
         return estimated_ECGs
+    
+
+    def cancel_ECG(self, original_realization, ECG_positions, real_ECGs, estimated_ECGs):
+        """
+        Subtracts the estimated ECGs of the original realization from the real ECGs
+        
+        Args:
+            original_realization (array): the realization where the estimated ECGs have to be subtracted
+
+            ECGs_positions (dict): contains a list of the positions of the actual K ECG complexes (centered on QRS peaks) for each realization of the process
+                    real_ECGs_positions["AECGi"] -> [(start_ECG_i_1, end__ECG_i_1), ..., (start_ECG_i_K, end__ECG_i_K)], for i in (0, num_realizations)
+
+            real_ECGs (dict): contains a list of the actual K ECG complexes (centered on QRS peaks) for each realization of the process
+                    real_ECGs["AECGi"] -> [[ECG_i_1], [ECG_i_2], ..., [ECG_i_K]],   for i in (0, num_realizations)
+
+            estimated_ECGs (dict): contains a list of the estimated K ECG complexes (centered on QRS peaks) for each realization of the process
+                estimated_ECGs["AECGi"] -> [[estimated_ECG_i_1], [estimated_ECG_i_2], ..., [estimated_ECG_i_K]],   for i in (0, num_realizations)
+
+        Returns:
+            residual_realization (array): original_realization where the ECG complexes have been cancelled
+            
+        """
+        residual_realization = original_realization.copy()
+        K = len(ECG_positions)
+        for i in range(K):
+            start_i_complex, end_i_complex = ECG_positions[i][0], ECG_positions[i][1]
+            residual = real_ECGs[i] - estimated_ECGs[i]
+            if start_i_complex == 0:
+                corrected_residual = residual[(len(residual)-end_i_complex):]
+                residual_realization[start_i_complex:end_i_complex] = corrected_residual
+            else:
+                residual_realization[start_i_complex:end_i_complex] = residual
+
+        return residual_realization

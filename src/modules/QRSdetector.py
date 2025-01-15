@@ -112,7 +112,7 @@ class QRSdetector:
         cross_corr_norm = cross_corr / norm_factor
 
         # Peaks detection (above the threshold, which is calculated with respect to the cross correlation maximum value)
-        peaks, _ = find_peaks(cross_corr_norm, height=self.threshold_factor*np.max(cross_corr_norm), distance=self.sr//2)
+        peaks, _ = find_peaks(cross_corr_norm, height=self.threshold_factor*np.max(cross_corr_norm), distance=self.sr//4)
 
         corrected_peaks = peaks + len(template) // 2
 
