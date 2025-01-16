@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft
-from scipy.signal import resample
+from scipy.signal import resample, welch
 
 class StochasticProcess:
     def __init__(self, num_realizations, realizations, labels, colors, sr):
@@ -133,6 +133,18 @@ class StochasticProcess:
         plt.ylim(0, ylim)
         plt.grid()
         plt.show()
+
+    def plot_realization_PSD(self, index, segment_length, title):
+        frequencies, psd = welch(self.get_realization_by_index(index), self.sr, nperseg=segment_length)
+
+        plt.figure(figsize=(14, 6))
+        plt.semilogy(frequencies, psd, label="PSD (Welch)")
+        plt.title(title)
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("Power/Frequency (dB/Hz)")
+        plt.legend()
+        plt.show()
+
 
         
     def plot(self):
