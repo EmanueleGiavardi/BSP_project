@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from modules import StochasticProcess
+import os
 
 
 class Evaluator:
@@ -49,14 +50,20 @@ class Evaluator:
         return MSEs, np.mean(MSEs)
 
 
-    def plot_comparison(self, correlations, MSEs):
+    def plot_comparison(self, correlations, MSEs, save_folder, plot, save):
         """
-        Plot the comparison between the average FCEG with estimated and ground truth peaks for each realization, with the associated metrics 
+        Plots the comparison between the average FCEG with estimated and ground truth peaks for each realization, with the associated metrics
+        and saves the resulting image 
 
         Args:
             correlations (array): correlation values for each realization
             MSEs (array): MSE values for each realization
+            save_folder (str): results folder path
+            plot (bool): if True, plots the results
+            save (bool): if True, saves the results in png files
         """
+        if save: os.makedirs(save_folder, exist_ok=True)
+
         for i in range(self.S5.num_realizations):
             label = f"AECG{i+1}"
             plt.figure(figsize=(12, 8))
@@ -72,4 +79,9 @@ class Evaluator:
             plt.text(text_x, text_y, metrics_text, fontsize=11, 
                  bbox=dict(facecolor='white', alpha=0.8, edgecolor='black'))
             plt.legend()
-            plt.show()
+            plt.title(f"FECG Peaks comparison - Realization {i+1}")
+
+            if save: plt.savefig(os.path.join(save_folder, f"{label}.png"), bbox_inches='tight')
+            if plot: plt.show()
+
+            plt.close()
