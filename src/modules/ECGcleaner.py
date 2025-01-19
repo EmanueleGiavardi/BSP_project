@@ -1,4 +1,4 @@
-from scipy.signal import firwin, filtfilt, iirnotch
+from scipy.signal import firwin, filtfilt, iirnotch, lfilter
 import numpy as np
 
 class ECGcleaner:
@@ -29,6 +29,22 @@ class ECGcleaner:
         cutoff_normalized = self.BW_freq / (0.5 * self.sr)
         fir_coefficients = firwin(num_taps, cutoff_normalized, pass_zero=False)
         filtered_signal = filtfilt(fir_coefficients, [1.0], signal)
+
+        return filtered_signal
+    
+    def remove_baseline_wander_singlepass(self, signal, num_taps):
+        """
+        Applies a linear-phase FIR high pass filter, with the cutoff frequency specified in the constructor
+
+        Args:
+            signal (array): the signal for which the baseline wander has to be removed
+        
+        Returns:
+            filtered_signal (array): the signal without the baseline wander component
+        """
+        cutoff_normalized = self.BW_freq / (0.5 * self.sr)
+        fir_coefficients = firwin(num_taps, cutoff_normalized, pass_zero=False)
+        filtered_signal = lfilter(fir_coefficients, [1.0], signal)
 
         return filtered_signal
     
