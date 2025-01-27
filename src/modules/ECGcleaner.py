@@ -16,6 +16,7 @@ class ECGcleaner:
         self.BW_freq = BW_freq
         self.PLI_freq = PLI_freq
 
+
     def remove_baseline_wander(self, signal, num_taps):
         """
         Applies a linear-phase FIR high pass filter, with the cutoff frequency specified in the constructor
@@ -32,6 +33,7 @@ class ECGcleaner:
 
         return filtered_signal
     
+
     def remove_baseline_wander_singlepass(self, signal, num_taps):
         """
         Applies a linear-phase FIR high pass filter, with the cutoff frequency specified in the constructor
@@ -48,12 +50,16 @@ class ECGcleaner:
 
         return filtered_signal
     
+
     def remove_PLI_notch(self, signal, notch_quality_factor):
         """
         Applies a IIR notch filter, with the cutoff frequency specified in the constructor
 
         Args:
             signal (array): the signal for which the power-line interference has to be removed
+            
+            notch_quality_factor (int): deals with the attenuation amount of the frequencies near PLI_freq
+                                        The higher this factor is, the narrower is the attenued band around PLI_freq
         
         Returns:
             filtered_signal (array): the signal without the PLI component
