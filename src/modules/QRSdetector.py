@@ -103,7 +103,6 @@ class QRSdetector:
             corrected_peaks (list): Positions (indexes) of the detected QRS complexes 
             cross_corr_norm (array): normalized cross-correlation
         """
-        # Cross-correlation between enhanced_QRS and QRS template (only positive part)
         cross_corr = correlate(enhanced_QRS, template, mode='full')
         cross_corr = cross_corr[len(template)-1:]
 
@@ -114,6 +113,8 @@ class QRSdetector:
         # Peaks detection (above the threshold, which is calculated with respect to the cross correlation maximum value)
         peaks, _ = find_peaks(cross_corr_norm, height=self.threshold_factor*np.max(cross_corr_norm), distance=self.sr//4)
 
+        # a cross-correlation peak is aligned with the beginning of the template (when the template starts to overlap with the signal), not with the centre
+        # so the correct peak position half of len(template) samples above
         corrected_peaks = peaks + len(template) // 2
 
         return corrected_peaks, cross_corr_norm
